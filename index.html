@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iOS 18 Clock</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsmediatags/3.9.5/jsmediatags.min.js"></script>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#111111">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Clock PWA">
+    <link rel="apple-touch-icon" href="logo (1).svg" media="(prefers-color-scheme: dark)">
+    <link rel="apple-touch-icon" href="logo.svg" media="(prefers-color-scheme: light)">
+    <style>
+        @font-face {
+            font-family: 'SF Pro Display';
+            src: url('https://sf.abarba.me/SF-Pro-Display-Bold.otf') format('opentype');
+            font-weight: bold;
+            font-style: normal;
+        }
+        
+        body {
+            background-color: transparent;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            color: #fff;
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+            height: 100vh;
+            margin: 0;
+            -webkit-app-region: drag;
+        }
+=======
+    </style>
+</head>
+<body class="wallpaper h-screen w-screen overflow-hidden flex flex-col items-center justify-between text-white font-sans" style="min-height: 100vh; display: flex; flex-direction: column; justify-content: space-between; align-items: center;">
+    <div class="clock-container" style="margin-top: 32px; z-index: 2; position: relative;">
+        <div id="time" class="clock-time">12:34</div>
+        <div id="date" class="clock-date">Monday, September 25</div>
+    </div>
+
+    <button id="settings-button" style="position: fixed; bottom: 20px; right: 20px; background: rgba(30,30,30,0.7); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; -webkit-app-region: no-drag; z-index: 100;">
+        ️
+    </button>
+
+    <style>
+        @media (max-width: 700px) {
+            #album-art-container {
+                width: 80vw !important;
+                height: 80vw !important;
+                max-width: 95vw !important;
+                max-height: 95vw !important;
+            }
+            #music-player {
+                width: 98vw !important;
+                margin-bottom: 16px !important;
+            }
+            .clock-container {
+                margin-top: 16px !important;
+                margin-bottom: 16px !important;
+            }
+            #album-art-center {
+                margin: 16px 0 16px 0 !important;
+            }
+        }
+        .clock-container {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column-reverse;
+            align-items: center;
+            background-color: transparent;
+            border-radius: 12px;
+            padding: 20px;
+            backdrop-filter: none;
+            margin-bottom: 100px;
+        }
+        
+        .clock-time {
+            font-size: clamp(48px, 10vw, 64px);
+            font-weight: 700;
+            letter-spacing: -2px;
+            opacity: 0.55;
+            margin-top: -8px;
+        }
+        
+        .clock-date {
+            font-size: clamp(14px, 3vw, 18px);
+            font-weight: 600;
+            letter-spacing: -0.3px;
+            opacity: 0.55;
+        }
+    </style>
+    
+    <div id="settings-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); z-index: 100; -webkit-app-region: no-drag;">
+        <div style="background-color: #1e1e1e; width: 400px; margin: 100px auto; padding: 20px; border-radius: 12px;">
+            <h2 style="margin-top: 0;">Settings</h2>
+            <input type="file" id="wallpaper-input" accept="image/*" style="display: none;">
+            <button onclick="document.getElementById('wallpaper-input').click()" style="background: #2c2c2e; color: white; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer;">
+                Upload Wallpaper
+            </button>
+            <div style="margin-top: 15px;">
+                <label for="bg-position-select" style="color: #fff; font-size: 14px;">Posizione sfondo:</label>
+                <select id="bg-position-select" style="margin-left: 8px; padding: 4px 8px; border-radius: 6px; border: none;">
+                    <option value="center">Centro</option>
+                    <option value="top">Alto</option>
+                    <option value="bottom">Basso</option>
+                    <option value="left">Sinistra</option>
+                    <option value="right">Destra</option>
+                </select>
+            </div>
+            <div style="margin-top: 10px;">
+                <label for="bg-size-select" style="color: #fff; font-size: 14px;">Dimensione sfondo:</label>
+                <select id="bg-size-select" style="margin-left: 8px; padding: 4px 8px; border-radius: 6px; border: none;">
+                    <option value="cover">Riempi schermo (cover)</option>
+                    <option value="contain">Contieni (contain)</option>
+                    <option value="auto">Auto</option>
+                    <option value="100%">100%</option>
+                    <option value="150%">150%</option>
+                    <option value="200%">200%</option>
+                </select>
+            </div>
+            <button onclick="document.getElementById('settings-modal').style.display = 'none'" style="background: #2c2c2e; color: white; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; margin-left: 10px;">
+                Close
+            </button>
+        </div>
+    </div>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('service-worker.js');
+            });
+        }
+        // Check if this is first visit and prompt for wallpaper
+        if (!localStorage.getItem('wallpaperSet')) {
+            setTimeout(() => {
+                document.getElementById('settings-modal').style.display = 'block';
+                localStorage.setItem('wallpaperSet', 'true');
+            }, 500);
+        }
+        document.getElementById('settings-button').addEventListener('click', function() {
+            document.getElementById('settings-modal').style.display = 'block';
+        });
+        document.getElementById('wallpaper-input').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    document.body.style.backgroundImage = `url(${event.target.result})`;
+                    document.body.style.backgroundSize = 'cover';
+                    document.body.style.backgroundPosition = 'center';
+                    document.body.style.backgroundRepeat = 'no-repeat';
+                    localStorage.setItem('wallpaperSet', 'true');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+        document.getElementById('bg-position-select').addEventListener('change', function(e) {
+            document.body.style.backgroundPosition = e.target.value;
+            localStorage.setItem('wallpaperPosition', e.target.value);
+        });
+        document.getElementById('bg-size-select').addEventListener('change', function(e) {
+            document.body.style.backgroundSize = e.target.value;
+            localStorage.setItem('wallpaperSize', e.target.value);
+        });
+        // Applica la posizione e la dimensione salvata all'avvio
+        if(localStorage.getItem('wallpaperPosition')) {
+            document.body.style.backgroundPosition = localStorage.getItem('wallpaperPosition');
+            document.getElementById('bg-position-select').value = localStorage.getItem('wallpaperPosition');
+        }
+        if(localStorage.getItem('wallpaperSize')) {
+            document.body.style.backgroundSize = localStorage.getItem('wallpaperSize');
+            document.getElementById('bg-size-select').value = localStorage.getItem('wallpaperSize');
+        }
+        function updateTime() {
+            const now = new Date();
+            const timeElement = document.getElementById('time');
+            const dateElement = document.getElementById('date');
+            // Format time (12:34) - iOS 18 style
+            let hours = now.getHours();
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            timeElement.textContent = `${hours}:${minutes}`;
+            // Format date (Monday, September 25) - iOS 18 style
+            const options = { 
+                weekday: 'long', 
+                month: 'long', 
+                day: 'numeric',
+                hour12: false
+            };
+            dateElement.textContent = now.toLocaleDateString('en-US', options);
+        }
+        updateTime();
+        setInterval(updateTime, 1000);
+    </script>
+</body>
+</html>
