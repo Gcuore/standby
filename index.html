@@ -34,15 +34,14 @@
 =======
     </style>
 </head>
-<body class="wallpaper h-screen w-screen overflow-hidden flex flex-col items-center justify-between text-white font-sans" style="min-height: 100vh; display: flex; flex-direction: column; justify-content: space-between; align-items: center;">
-    <div class="clock-container" style="margin-top: 32px; z-index: 2; position: relative;">
-        <div id="time" class="clock-time">12:34</div>
+<body class="wallpaper h-screen w-screen overflow-hidden flex flex-col items-center justify-between text-white font-sans" style="min-height: 100vh; display: flex; flex-direction: column; justify-content: space-between; align-items: center; background-color: #181c20;">
+    <!-- RIMOSSO il div wallpaper-hint -->
+    <div class="clock-container" style="margin-top: 32px; z-index: 2; position: relative; display: none;">
         <div id="date" class="clock-date">Monday, September 25</div>
+        <div id="time" class="clock-time">12:34</div>
     </div>
 
-    <button id="settings-button" style="position: fixed; bottom: 20px; right: 20px; background: rgba(30,30,30,0.7); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; -webkit-app-region: no-drag; z-index: 100;">
-        ️
-    </button>
+    <!-- RIMOSSO il pulsante impostazioni -->
 
     <style>
         @media (max-width: 700px) {
@@ -70,7 +69,7 @@
             left: 50%;
             transform: translateX(-50%);
             display: flex;
-            flex-direction: column-reverse;
+            flex-direction: column;
             align-items: center;
             background-color: transparent;
             border-radius: 12px;
@@ -142,9 +141,29 @@
                 localStorage.setItem('wallpaperSet', 'true');
             }, 500);
         }
-        document.getElementById('settings-button').addEventListener('click', function() {
-            document.getElementById('settings-modal').style.display = 'block';
+        // Triplo click sull'orologio per aprire le impostazioni
+        let clockClickCount = 0;
+        let clockClickTimer = null;
+        document.querySelector('.clock-container').addEventListener('click', function() {
+            clockClickCount++;
+            if (clockClickCount === 1) {
+                clockClickTimer = setTimeout(() => { clockClickCount = 0; }, 600);
+            }
+            if (clockClickCount === 3) {
+                document.getElementById('settings-modal').style.display = 'block';
+                clockClickCount = 0;
+                clearTimeout(clockClickTimer);
+            }
         });
+        // Mostra l'orologio solo dopo aver caricato uno sfondo
+        if (localStorage.getItem('wallpaperSet')) {
+            document.querySelector('.clock-container').style.display = 'block';
+        }
+        // Se non c'è uno sfondo, imposta un colore di background scuro
+        if (!localStorage.getItem('wallpaperSet')) {
+            document.body.style.backgroundColor = '#181c20';
+            document.getElementById('settings-modal').style.display = 'block';
+        }
         document.getElementById('wallpaper-input').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
@@ -155,6 +174,8 @@
                     document.body.style.backgroundPosition = 'center';
                     document.body.style.backgroundRepeat = 'no-repeat';
                     localStorage.setItem('wallpaperSet', 'true');
+                    document.querySelector('.clock-container').style.display = 'block';
+                    document.body.style.backgroundColor = '';
                 };
                 reader.readAsDataURL(file);
             }
@@ -195,6 +216,10 @@
         }
         updateTime();
         setInterval(updateTime, 1000);
+        // Apri subito le impostazioni se non c'è uno sfondo
+        if (!localStorage.getItem('wallpaperSet')) {
+            document.getElementById('settings-modal').style.display = 'block';
+        }
     </script>
 </body>
 </html>
