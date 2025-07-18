@@ -5,7 +5,11 @@ const toCache = [
   '/style.css',
   '/manifest.json',
   '/icon-192.png',
-  '/icon-512.png'
+  '/icon-512.png',
+  '/Fortnite - Hungry For The Chase - Piper Pace (Official Music Video).mp3',
+  '/READY OR NOT - c00lkidd Chase Theme  Forsaken OST.mp3',
+  '/SpotiDownloader.com - Nope your too late i already died - wifiskeleton.mp3',
+  '/ventura.webp'
 ];
 
 self.addEventListener('install', event => {

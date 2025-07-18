@@ -10,8 +10,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Clock PWA">
-    <link rel="apple-touch-icon" href="logo (1).svg" media="(prefers-color-scheme: dark)">
-    <link rel="apple-touch-icon" href="logo.svg" media="(prefers-color-scheme: light)">
+    <link rel="apple-touch-icon" href="icon.png">
     <style>
         @font-face {
             font-family: 'SF Pro Display';
@@ -92,15 +91,185 @@
             letter-spacing: -0.3px;
             opacity: 0.55;
         }
+        #cover-overlay-img {
+            transition: transform 0.45s cubic-bezier(.4,2,.6,1), width 0.45s, height 0.45s, opacity 0.35s;
+            opacity: 0;
+            transform: scale(0.7);
+        }
+        #cover-overlay.show #cover-overlay-img {
+            opacity: 1;
+            transform: scale(1);
+        }
+        #blur-overlay {
+            transition: backdrop-filter 0.5s, background 0.5s, opacity 0.5s;
+            opacity: 0;
+        }
+        #blur-overlay.show {
+            opacity: 1;
+        }
+        /* Allineamento centrato per overlay espanso */
+        #cover-overlay .player-texts-compact {
+            align-items: center !important;
+            text-align: center !important;
+        }
+        #player-info .player-texts-compact {
+            align-items: center;
+            text-align: center;
+        }
+        #player-info.has-cover .player-texts-compact {
+            align-items: flex-start;
+            text-align: left;
+        }
+        #settings-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0,0,0,0.18);
+            z-index: 1200;
+            -webkit-app-region: no-drag;
+            transition: background 0.3s;
+        }
+        #settings-modal .settings-window {
+            position: absolute;
+            top: 48px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-40px);
+            min-width: 420px;
+            max-width: 98vw;
+            min-height: 220px;
+            background: rgba(255,255,255,0.18);
+            border-radius: 48px 80px 48px 80px/48px 48px 80px 80px;
+            box-shadow: 0 8px 32px 0 rgba(0,0,0,0.18), 0 1.5px 0 0 rgba(255,255,255,0.25) inset;
+            border: 1.5px solid rgba(255,255,255,0.45);
+            backdrop-filter: blur(32px) saturate(1.2);
+            -webkit-backdrop-filter: blur(32px) saturate(1.2);
+            padding: 32px 36px 24px 36px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.35s cubic-bezier(.4,2,.6,1), transform 0.35s cubic-bezier(.4,2,.6,1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #settings-modal.show {
+            display: block;
+            background: rgba(0,0,0,0.28);
+        }
+        #settings-modal.show .settings-window {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateX(-50%) translateY(0);
+        }
+        @media (max-width: 700px) {
+            #settings-modal .settings-window {
+                min-width: 100vw;
+                max-width: 100vw;
+                min-height: 100vh;
+                height: 100dvh;
+                border-radius: 0;
+                box-shadow: none;
+                border: none;
+                padding: 8px 2vw 8px 2vw;
+                top: 0;
+                left: 0;
+                transform: none;
+                align-items: flex-start;
+                background: #181c20 !important;
+                backdrop-filter: none !important;
+                -webkit-backdrop-filter: none !important;
+                overflow-y: auto;
+            }
+            #settings-modal .settings-window button[onclick*='classList.remove'] {
+                position: absolute;
+                top: 12px;
+                right: 12px;
+                margin: 0;
+            }
+            .clock-container {
+                display: flex !important;
+            }
+        }
+        #settings-modal select, #settings-modal button {
+            background: rgba(255,255,255,0.18);
+            border: 1.5px solid rgba(255,255,255,0.35);
+            border-radius: 16px;
+            box-shadow: 0 2px 8px 0 rgba(0,0,0,0.08);
+            backdrop-filter: blur(16px) saturate(1.1);
+            -webkit-backdrop-filter: blur(16px) saturate(1.1);
+            color: #fff;
+            font-size: 15px;
+            font-weight: 500;
+            outline: none;
+            transition: background 0.2s, box-shadow 0.2s, border 0.2s;
+        }
+        #settings-modal select:focus, #settings-modal button:focus {
+            border: 1.5px solid rgba(255,255,255,0.55);
+            box-shadow: 0 4px 16px 0 rgba(0,0,0,0.12);
+            background: rgba(255,255,255,0.28);
+        }
+        #settings-modal button:hover {
+            background: rgba(255,255,255,0.28);
+            box-shadow: 0 4px 16px 0 rgba(0,0,0,0.14);
+        }
+        #settings-modal select {
+            padding: 7px 16px;
+            margin-right: 8px;
+            min-width: 120px;
+        }
+        #settings-modal button {
+            padding: 10px 18px;
+            margin-right: 8px;
+            cursor: pointer;
+        }
+        @media (max-width: 700px) {
+            #settings-modal select, #settings-modal button {
+                border-radius: 10px;
+                font-size: 16px;
+                padding: 10px 12px;
+            }
+        }
+        #settings-modal select, #settings-modal option {
+            color: #222 !important;
+            background: rgba(255,255,255,0.18) !important;
+            border: 1.5px solid rgba(255,255,255,0.35);
+            border-radius: 16px;
+            box-shadow: 0 2px 8px 0 rgba(0,0,0,0.08);
+            backdrop-filter: blur(16px) saturate(1.1);
+            -webkit-backdrop-filter: blur(16px) saturate(1.1);
+        }
+        #settings-modal select:focus, #settings-modal option:focus {
+            background: rgba(255,255,255,0.28) !important;
+        }
+        .yt-warning {
+            color: #fff !important;
+            font-size: 12px;
+            margin-top: 6px;
+            max-width: 350px;
+        }
     </style>
     
-    <div id="settings-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); z-index: 100; -webkit-app-region: no-drag;">
-        <div style="background-color: #1e1e1e; width: 400px; margin: 100px auto; padding: 20px; border-radius: 12px;">
+    <div id="settings-modal">
+        <div class="settings-window">
             <h2 style="margin-top: 0;">Settings</h2>
             <input type="file" id="wallpaper-input" accept="image/*" style="display: none;">
             <button onclick="document.getElementById('wallpaper-input').click()" style="background: #2c2c2e; color: white; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer;">
                 Upload Wallpaper
             </button>
+            <div style="margin-top: 15px;">
+                <label for="music-input" style="color: #fff; font-size: 14px;">Carica musica:</label>
+                <input type="file" id="music-input" accept="audio/*" style="display: none;">
+                <button id="music-upload-btn" style="background: #2c2c2e; color: white; border: none; padding: 8px 14px; border-radius: 8px; cursor: pointer; margin-left: 8px;">Scegli file audio</button>
+            </div>
+            <div style="margin-top: 15px;">
+                <label for="youtube-bg-input" style="color: #fff; font-size: 14px;">YouTube background:</label>
+                <input type="text" id="youtube-bg-input" placeholder="Incolla link YouTube" style="padding: 4px 8px; border-radius: 6px; border: none; width: 220px; margin-left: 8px;">
+                <button id="youtube-bg-btn" style="background: #2c2c2e; color: white; border: none; padding: 8px 14px; border-radius: 8px; cursor: pointer; margin-left: 8px;">Usa video</button>
+                <label style="margin-left: 12px; font-size: 13px; color: #fff; vertical-align: middle;"><input type="checkbox" id="youtube-bg-mute" checked style="vertical-align: middle; margin-right: 4px;">Silenzia video</label>
+                <div class="yt-warning">Per usare un video YouTube come sfondo, hai bisogno dell'estensione <b>Ignore X-Frame headers</b> (Chrome/Edge). Il video sarà silenziato e in loop.</div>
+            </div>
             <div style="margin-top: 15px;">
                 <label for="bg-position-select" style="color: #fff; font-size: 14px;">Posizione sfondo:</label>
                 <select id="bg-position-select" style="margin-left: 8px; padding: 4px 8px; border-radius: 6px; border: none;">
@@ -122,11 +291,74 @@
                     <option value="200%">200%</option>
                 </select>
             </div>
-            <button onclick="document.getElementById('settings-modal').style.display = 'none'" style="background: #2c2c2e; color: white; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; margin-left: 10px;">
+            <div style="margin-top: 15px;">
+                <label for="player-pos-select" style="color: #fff; font-size: 14px;">Posizione player:</label>
+                <select id="player-pos-select" style="margin-left: 8px; padding: 4px 8px; border-radius: 6px; border: none;">
+                    <option value="bottom">Basso</option>
+                    <option value="top">Alto</option>
+                    <option value="center">Centro</option>
+                </select>
+                <label for="cover-pos-select" style="color: #fff; font-size: 14px; margin-left: 18px;">Copertina:</label>
+                <select id="cover-pos-select" style="margin-left: 8px; padding: 4px 8px; border-radius: 6px; border: none;">
+                    <option value="left">Sinistra</option>
+                    <option value="right">Destra</option>
+                </select>
+            </div>
+            <div style="margin-top: 15px;">
+                <label for="default-song-select" style="color: #fff; font-size: 14px;">Canzone predefinita:</label>
+                <select id="default-song-select" style="margin-left: 8px; padding: 4px 8px; border-radius: 6px; border: none;">
+                    <option value="">-- Nessuna --</option>
+                    <option value="Fortnite - Hungry For The Chase - Piper Pace (Official Music Video).mp3">Fortnite - Hungry For The Chase</option>
+                    <option value="READY OR NOT - c00lkidd Chase Theme  Forsaken OST.mp3">READY OR NOT - c00lkidd Chase Theme</option>
+                    <option value="SpotiDownloader.com - Nope your too late i already died - wifiskeleton.mp3">Nope your too late i already died</option>
+                </select>
+                <label for="default-bg-select" style="color: #fff; font-size: 14px; margin-left: 18px;">Sfondo predefinito:</label>
+                <select id="default-bg-select" style="margin-left: 8px; padding: 4px 8px; border-radius: 6px; border: none;">
+                    <option value="">-- Nessuno --</option>
+                    <option value="ventura.webp">Ventura</option>
+                </select>
+            </div>
+            <button onclick="document.getElementById('settings-modal').classList.remove('show')" style="background: #2c2c2e; color: white; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; margin-left: 10px;">
                 Close
             </button>
         </div>
     </div>
+
+    <div id="ios-player-cube-container" style="position: fixed; left: 50%; bottom: 40px; transform: translateX(-50%); z-index: 200; width: 92vw; max-width: 340px; display: none;">
+        <div id="ios-player-cube" style="position: relative; width: 100%; height: 128px; border-radius: 32px; background: rgba(30,30,40,0.45); backdrop-filter: blur(24px) saturate(1.2); display: flex; align-items: center; justify-content: center; overflow: visible; transition: all 0.35s cubic-bezier(.4,2,.6,1);">
+            <div id="player-row" style="display: flex; flex-direction: row; align-items: center; width: 100%; height: 100%; transition: all 0.35s cubic-bezier(.4,2,.6,1);">
+                <div id="ios-player-mini" style="position: relative; width: 72px; height: 72px; border-radius: 18px; background: rgba(255,255,255,0.10); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.35s cubic-bezier(.4,2,.6,1); z-index: 2; overflow: hidden; margin-left: 18px; margin-right: 18px;">
+                    <img id="mini-cover" src="" alt="cover" style="width: 100%; height: 100%; object-fit: contain; border-radius: 16px; display: none;">
+                    <span id="mini-placeholder" style="width: 32px; height: 32px; background: #2226; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; color: #fff;">♪</span>
+                </div>
+                <div id="player-info" style="flex: 1; color: #fff; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 8px; height: auto; padding-left: 18px; padding-right: 10px;">
+                    <div id="player-texts" style="width: 100%; display: flex; flex-direction: column; align-items: flex-start; text-align: left;">
+                        <div id="track-title" style="font-size: 18px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; line-height: 1.2;">Nessuna traccia</div>
+                        <div id="track-artist" style="font-size: 14px; opacity: 0.8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; line-height: 1.2;">Carica una canzone</div>
+                    </div>
+                    <div id="player-controls" style="width: 100%; display: flex; justify-content: center; align-items: center; margin-top: 4px;">
+                        <button id="play-btn" style="background: none; border: none; color: white; font-size: 22px; margin-right: 10px; cursor: pointer; flex-shrink: 0;">▶</button>
+                        <input type="range" id="progress-bar" min="0" max="100" value="0" style="flex: 1; height: 4px; min-width: 0; max-width: 180px;">
+                        <span id="current-time" style="font-size: 12px; margin-left: 8px; flex-shrink: 0;">0:00</span>
+                        <span id="duration" style="font-size: 12px; margin-left: 4px; opacity: 0.7; flex-shrink: 0;">0:00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="cover-overlay" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 100;">
+        <div id="cover-overlay-img" style="width: min(70vw, 70vh, 340px); height: min(70vw, 70vh, 340px); max-width: 80vw; max-height: 80vh; background: transparent; border-radius: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; cursor: pointer;">
+            <img id="cover-overlay-image" src="" alt="cover" style="width: 100%; height: 100%; object-fit: contain; border-radius: 16px; display: none;">
+            <span id="cover-overlay-placeholder" style="width: 32px; height: 32px; background: #2226; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; color: #fff;">♪</span>
+            <!-- RIMOSSO blocco player-texts-compact -->
+        </div>
+    </div>
+
+    <div id="blur-overlay" style="display: none; position: fixed; inset: 0; z-index: 0; pointer-events: none; width: 100vw; height: 100vh;"></div>
+
+    <div id="youtube-bg-iframe-container" style="display: none; position: fixed; inset: 0; z-index: -1; pointer-events: none;"></div>
+    <!-- RIMOSSO overlay controllo pagina -->
 
     <script>
         if ('serviceWorker' in navigator) {
@@ -137,9 +369,16 @@
         // Check if this is first visit and prompt for wallpaper
         if (!localStorage.getItem('wallpaperSet')) {
             setTimeout(() => {
-                document.getElementById('settings-modal').style.display = 'block';
+                document.getElementById('settings-modal').classList.add('show');
                 localStorage.setItem('wallpaperSet', 'true');
             }, 500);
+        }
+        // Mostra/nascondi impostazioni con animazione
+        function showSettingsModal() {
+            document.getElementById('settings-modal').classList.add('show');
+        }
+        function hideSettingsModal() {
+            document.getElementById('settings-modal').classList.remove('show');
         }
         // Triplo click sull'orologio per aprire le impostazioni
         let clockClickCount = 0;
@@ -150,7 +389,7 @@
                 clockClickTimer = setTimeout(() => { clockClickCount = 0; }, 600);
             }
             if (clockClickCount === 3) {
-                document.getElementById('settings-modal').style.display = 'block';
+                showSettingsModal();
                 clockClickCount = 0;
                 clearTimeout(clockClickTimer);
             }
@@ -162,7 +401,7 @@
         // Se non c'è uno sfondo, imposta un colore di background scuro
         if (!localStorage.getItem('wallpaperSet')) {
             document.body.style.backgroundColor = '#181c20';
-            document.getElementById('settings-modal').style.display = 'block';
+            document.getElementById('settings-modal').classList.add('show');
         }
         document.getElementById('wallpaper-input').addEventListener('change', function(e) {
             const file = e.target.files[0];
@@ -218,8 +457,320 @@
         setInterval(updateTime, 1000);
         // Apri subito le impostazioni se non c'è uno sfondo
         if (!localStorage.getItem('wallpaperSet')) {
-            document.getElementById('settings-modal').style.display = 'block';
+            document.getElementById('settings-modal').classList.add('show');
         }
+        // Bottone per caricare musica
+        document.getElementById('music-upload-btn').onclick = function() {
+            document.getElementById('music-input').click();
+        };
+        // Player audio e metadata
+        const audio = new Audio();
+        let currentTrack = null;
+        let isPlaying = false;
+        // Mostra/nascondi copertina e placeholder
+        function updateMiniCover(imageUrl) {
+            const cover = document.getElementById('mini-cover');
+            const placeholder = document.getElementById('mini-placeholder');
+            const playerInfo = document.getElementById('player-info');
+            if (imageUrl) {
+                cover.src = imageUrl;
+                cover.style.display = 'block';
+                placeholder.style.display = 'none';
+                playerInfo.classList.add('has-cover');
+            } else {
+                cover.src = '';
+                cover.style.display = 'none';
+                placeholder.style.display = 'flex';
+                playerInfo.classList.remove('has-cover');
+            }
+        }
+        function loadTrack(file) {
+            currentTrack = file;
+            document.getElementById('ios-player-cube-container').style.display = 'block';
+            // Leggi metadata
+            jsmediatags.read(file, {
+                onSuccess: function(tag) {
+                    const tags = tag.tags;
+                    document.getElementById('track-title').textContent = tags.title || file.name.replace(/\.[^/.]+$/, "");
+                    document.getElementById('track-artist').textContent = tags.artist || 'Artista sconosciuto';
+                    if (tags.picture) {
+                        const base64String = arrayBufferToBase64(tags.picture.data);
+                        const imageUrl = `data:${tags.picture.format};base64,${base64String}`;
+                        updateMiniCover(imageUrl);
+                    } else {
+                        updateMiniCover(null);
+                    }
+                },
+                onError: function() {
+                    document.getElementById('track-title').textContent = file.name.replace(/\.[^/.]+$/, "");
+                    document.getElementById('track-artist').textContent = 'Artista sconosciuto';
+                    updateMiniCover(null);
+                }
+            });
+            // Carica audio
+            const url = URL.createObjectURL(file);
+            audio.src = url;
+            audio.load();
+            audio.play().then(() => {
+                document.getElementById('play-btn').textContent = '⏸';
+                isPlaying = true;
+            }).catch(() => {
+                document.getElementById('play-btn').textContent = '▶';
+                isPlaying = false;
+            });
+            document.getElementById('progress-bar').value = 0;
+            document.getElementById('current-time').textContent = '0:00';
+            document.getElementById('duration').textContent = '0:00';
+        }
+        document.getElementById('music-input').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            loadTrack(file);
+        });
+        document.getElementById('default-song-select').addEventListener('change', async function(e) {
+            const val = e.target.value;
+            if (!val) return;
+            const response = await fetch(val);
+            const blob = await response.blob();
+            const file = new File([blob], val, {type: 'audio/mp3'});
+            loadTrack(file);
+            e.target.value = '';
+        });
+        // Controlli player
+        document.getElementById('play-btn').onclick = function() {
+            if (!audio.src) return;
+            if (isPlaying) {
+                audio.pause();
+                this.textContent = '▶';
+            } else {
+                audio.play();
+                this.textContent = '⏸';
+            }
+            isPlaying = !isPlaying;
+        };
+        document.getElementById('progress-bar').addEventListener('input', function() {
+            if (audio.duration) {
+                const seekTime = (audio.duration * this.value) / 100;
+                audio.currentTime = seekTime;
+            }
+        });
+        audio.addEventListener('timeupdate', function() {
+            if (audio.duration) {
+                const progress = (audio.currentTime / audio.duration) * 100;
+                document.getElementById('progress-bar').value = progress;
+                document.getElementById('current-time').textContent = formatTime(audio.currentTime);
+                document.getElementById('duration').textContent = formatTime(audio.duration);
+            }
+        });
+        audio.addEventListener('ended', function() {
+            document.getElementById('play-btn').textContent = '▶';
+            isPlaying = false;
+        });
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
+        }
+        function arrayBufferToBase64(buffer) {
+            let binary = '';
+            const bytes = new Uint8Array(buffer);
+            for (let i = 0; i < bytes.byteLength; i++) {
+                binary += String.fromCharCode(bytes[i]);
+            }
+            return window.btoa(binary);
+        }
+        // Animazione pillola stile iOS lockscreen aggiornata per rettangolo in basso
+        const mini = document.getElementById('ios-player-mini');
+        const cube = document.getElementById('ios-player-cube');
+        let expanded = false; // DICHIARAZIONE UNICA
+        let originalBg = '';
+        let originalBgSize = '';
+        let originalBgPos = '';
+        let originalBgRepeat = '';
+        let originalBgColor = '';
+        mini.addEventListener('click', function(e) {
+            e.stopPropagation();
+            expanded = !expanded;
+            const playerRow = document.getElementById('player-row');
+            const playerInfo = document.getElementById('player-info');
+            const mini = document.getElementById('ios-player-mini');
+            if (expanded) {
+                mini.style.position = 'fixed';
+                mini.style.top = '50%';
+                mini.style.left = '50%';
+                mini.style.transform = 'translate(-50%, -50%) scale(1.1)';
+                mini.style.width = 'min(40vw, 220px)';
+                mini.style.height = 'min(40vw, 220px)';
+                mini.style.boxShadow = '0 8px 32px rgba(0,0,0,0.18)';
+                mini.style.background = 'rgba(255,255,255,0.25)';
+                mini.style.zIndex = '1';
+                mini.style.pointerEvents = 'auto';
+                mini.style.marginLeft = '0';
+                mini.style.marginRight = '0';
+                mini.style.marginTop = '0';
+            } else {
+                mini.style.position = 'relative';
+                mini.style.top = 'auto';
+                mini.style.left = 'auto';
+                mini.style.transform = 'none';
+                mini.style.width = '56px';
+                mini.style.height = '56px';
+                mini.style.boxShadow = '0 2px 8px rgba(0,0,0,0.10)';
+                mini.style.background = 'rgba(255,255,255,0.10)';
+                mini.style.zIndex = '2';
+                mini.style.pointerEvents = 'auto';
+                mini.style.marginLeft = '18px';
+                mini.style.marginRight = '18px';
+                mini.style.marginTop = '0';
+            }
+        });
+        // Overlay copertina espansa stile iOS
+        const coverOverlay = document.getElementById('cover-overlay');
+        const coverOverlayImg = document.getElementById('cover-overlay-img');
+        const coverOverlayImage = document.getElementById('cover-overlay-image');
+        const coverOverlayPlaceholder = document.getElementById('cover-overlay-placeholder');
+        mini.addEventListener('click', function(e) {
+            e.stopPropagation();
+            expanded = true;
+            mini.style.display = 'none';
+            coverOverlay.style.display = 'block';
+            resizeCoverOverlay();
+            coverOverlay.classList.add('show');
+            // Aggiorna immagine/placeholder
+            const cover = document.getElementById('mini-cover');
+            let coverUrl = '';
+            if (cover && cover.src && cover.style.display !== 'none') {
+                coverOverlayImage.src = cover.src;
+                coverOverlayImage.style.display = 'block';
+                coverOverlayPlaceholder.style.display = 'none';
+                coverUrl = cover.src;
+            } else {
+                coverOverlayImage.src = '';
+                coverOverlayImage.style.display = 'none';
+                coverOverlayPlaceholder.style.display = 'flex';
+            }
+            // Effetto blur copertina come sfondo
+            if (coverUrl) {
+                const blurOverlay = document.getElementById('blur-overlay');
+                originalBg = document.body.style.backgroundImage;
+                originalBgSize = document.body.style.backgroundSize;
+                originalBgPos = document.body.style.backgroundPosition;
+                originalBgRepeat = document.body.style.backgroundRepeat;
+                originalBgColor = document.body.style.backgroundColor;
+                document.body.style.backgroundImage = `url('${coverUrl}')`;
+                document.body.style.backgroundSize = 'cover';
+                document.body.style.backgroundPosition = 'center';
+                document.body.style.backgroundRepeat = 'no-repeat';
+                document.body.style.backgroundColor = '#181c20';
+                blurOverlay.style.display = 'block';
+                void blurOverlay.offsetWidth;
+                blurOverlay.classList.add('show');
+                blurOverlay.style.backdropFilter = 'blur(32px) brightness(0.7)';
+                blurOverlay.style.background = 'rgba(0,0,0,0.45)';
+            }
+        });
+        coverOverlayImg.addEventListener('click', function(e) {
+            e.stopPropagation();
+            expanded = false;
+            coverOverlay.classList.remove('show');
+            setTimeout(() => coverOverlay.style.display = 'none', 400);
+            mini.style.display = 'flex';
+            mini.style.position = 'relative';
+            mini.style.width = '72px';
+            mini.style.height = '72px';
+            mini.style.borderRadius = '18px';
+            mini.style.marginLeft = '18px';
+            mini.style.marginRight = '18px';
+            mini.style.marginTop = '0';
+            mini.style.top = 'auto';
+            mini.style.left = 'auto';
+            mini.style.transform = 'none';
+            mini.style.boxShadow = '0 2px 8px rgba(0,0,0,0.10)';
+            mini.style.background = 'rgba(255,255,255,0.10)';
+            mini.style.zIndex = '2';
+            // Ripristina sfondo originale
+            const blurOverlay = document.getElementById('blur-overlay');
+            blurOverlay.classList.remove('show');
+            setTimeout(() => blurOverlay.style.display = 'none', 500);
+            document.body.style.backgroundImage = originalBg;
+            document.body.style.backgroundSize = originalBgSize;
+            document.body.style.backgroundPosition = originalBgPos;
+            document.body.style.backgroundRepeat = originalBgRepeat;
+            document.body.style.backgroundColor = originalBgColor;
+        });
+
+        document.getElementById('player-pos-select').addEventListener('change', function(e) {
+            const val = e.target.value;
+            const player = document.getElementById('ios-player-cube-container');
+            player.style.top = '';
+            player.style.bottom = '';
+            player.style.left = '50%';
+            player.style.transform = 'translateX(-50%)';
+            if (val === 'bottom') {
+                player.style.bottom = '40px';
+            } else if (val === 'top') {
+                player.style.top = '40px';
+            } else if (val === 'center') {
+                player.style.top = '50%';
+                player.style.transform = 'translate(-50%, -50%)';
+            }
+        });
+        document.getElementById('cover-pos-select').addEventListener('change', function(e) {
+            const val = e.target.value;
+            const mini = document.getElementById('ios-player-mini');
+            if (val === 'left') {
+                mini.style.order = '0';
+                mini.style.marginLeft = '18px';
+                mini.style.marginRight = '18px';
+            } else if (val === 'right') {
+                mini.style.order = '2';
+                mini.style.marginLeft = '18px';
+                mini.style.marginRight = '0';
+            }
+        });
+
+        document.getElementById('youtube-bg-btn').onclick = function() {
+            const url = document.getElementById('youtube-bg-input').value.trim();
+            const container = document.getElementById('youtube-bg-iframe-container');
+            const mute = document.getElementById('youtube-bg-mute').checked ? 1 : 0;
+            if (!url) {
+                container.innerHTML = '';
+                container.style.display = 'none';
+                return;
+            }
+            // Estrai ID video YouTube
+            const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
+            if (!match) {
+                alert('Link YouTube non valido!');
+                return;
+            }
+            const videoId = match[1];
+            container.innerHTML = `<iframe src="https://www.youtube.com/embed/${videoId}?autoplay=1&mute=${mute}&controls=0&loop=1&playlist=${videoId}&modestbranding=1&showinfo=0&rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen style="width:100vw;height:100vh;position:absolute;top:0;left:0;pointer-events:none;z-index:-1;"></iframe>`;
+            container.style.display = 'block';
+        };
+
+        let ytControlActive = false;
+        // RIMOSSO: nessun doppio click per controllo iframe YouTube
+        document.getElementById('default-bg-select').addEventListener('change', function(e) {
+            const val = e.target.value;
+            if (!val) return;
+            document.body.style.backgroundImage = `url('${val}')`;
+            document.body.style.backgroundSize = 'cover';
+            document.body.style.backgroundPosition = 'center';
+            document.body.style.backgroundRepeat = 'no-repeat';
+            localStorage.setItem('wallpaperSet', 'true');
+        });
+
+        function resizeCoverOverlay() {
+            const cover = document.getElementById('cover-overlay-img');
+            if (!cover) return;
+            const vw = window.innerWidth;
+            const vh = window.innerHeight;
+            const size = Math.max(180, Math.min(520, Math.floor(Math.min(vw, vh) * 0.5)));
+            cover.style.width = size + 'px';
+            cover.style.height = size + 'px';
+        }
+        window.addEventListener('resize', resizeCoverOverlay);
     </script>
 </body>
 </html>
