@@ -1,0 +1,5 @@
+{
+  "name": "Standby",
+  "description": "An iOS-inspired standby mode interface with scrollable widgets and a full-screen clock, built with React and Tailwind CSS.",
+  "requestFramePermissions": ["geolocation"]
+}

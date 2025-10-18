@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="/apple-touch-icon.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no" />
+    <meta name="theme-color" content="#000000" />
+    <title>Standby</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      @font-face {
+        font-family: 'SF Pro Display Black';
+        src: url('/SF-Pro-Display-Black.otf') format('opentype');
+        font-weight: 900;
+        font-style: normal;
+      }
+      html, body {
+        background-color: black;
+        font-family: 'SF Pro Display Black', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        /* Disable browser-native pull-to-refresh and swipe navigation gestures */
+        overscroll-behavior-y: none;
+        overscroll-behavior-x: contain;
+      }
+      /* Apply gesture-related styles globally to create a more app-like feel */
+      * {
+        -webkit-user-select: none; /* Safari */
+        -moz-user-select: none; /* Firefox */
+        -ms-user-select: none; /* IE10+/Edge */
+        user-select: none; /* Standard */
+        -webkit-tap-highlight-color: transparent; /* Disable tap highlight on iOS */
+        -webkit-touch-callout: none; /* Disable callout menu on long-press */
+      }
+      /* Hide scrollbar for Chrome, Safari and Opera */
+      .no-scrollbar::-webkit-scrollbar {
+          display: none;
+      }
+      /* Hide scrollbar for IE, Edge and Firefox */
+      .no-scrollbar {
+          -ms-overflow-style: none;  /* IE and Edge */
+          scrollbar-width: none;  /* Firefox */
+      }
+      /* Jiggle animation for edit mode */
+      @keyframes jiggle {
+        0% { transform: rotate(-0.75deg); }
+        50% { transform: rotate(0.75deg); }
+        100% { transform: rotate(-0.75deg); }
+      }
+      .jiggle {
+        animation: jiggle 0.2s infinite linear;
+      }
+    </style>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              'sfpro': ['"SF Pro Display Black"', 'sans-serif'],
+            },
+            borderRadius: {
+              '4xl': '2rem',
+            }
+          },
+        },
+      }
+    </script>
+     <script src="https://cdnjs.cloudflare.com/ajax/libs/jsmediatags/3.9.5/jsmediatags.min.js"></script>
+     <script src="https://unpkg.com/fast-average-color/dist/index.min.js"></script>
+  <script type="importmap">
+{
+  "imports": {
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>
